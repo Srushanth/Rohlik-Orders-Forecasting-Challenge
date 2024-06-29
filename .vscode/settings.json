@@ -1,0 +1,7 @@
+{
+    "DockerRun.DisableDockerrc": true,
+    "cSpell.words": [
+        "fillna",
+        "isna"
+    ]
+}
