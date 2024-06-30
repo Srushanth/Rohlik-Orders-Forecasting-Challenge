@@ -14,7 +14,7 @@ import pandas as pd  # type: ignore
 from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split  # type: ignore
-from sklearn.linear_model import ARDRegression
+from sklearn.linear_model import HuberRegressor  # type: ignore
 
 from rocketml.pipeline import Pipeline
 from rocketml.pre_process import PreProcessing
@@ -67,10 +67,10 @@ x_train, x_test, y_train, y_test = train_test_split(
     X, y, train_size=0.8, random_state=42
 )
 
-ardr = ARDRegression()
-ardr.fit(x_train, y_train)
+regressor = HuberRegressor()
+regressor.fit(x_train, y_train)
 
-y_pred = ardr.predict(x_test)
+y_pred = regressor.predict(x_test)
 
 mse = mean_squared_error(y_true=y_test, y_pred=y_pred)
 print(mse)
@@ -81,7 +81,7 @@ print(r2)
 df_test = pd.read_csv("../data/test.csv")
 pipe = Pipeline()
 df_submission = pipe.preprocess_pipeline(df=df_test, steps=steps)
-res = ardr.predict(df_submission)
+res = regressor.predict(df_submission)
 
 # Create submission
 submission = pd.DataFrame()

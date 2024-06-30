@@ -14,7 +14,7 @@ import pandas as pd  # type: ignore
 from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split  # type: ignore
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression  # type: ignore
 
 from rocketml.pipeline import Pipeline
 from rocketml.pre_process import PreProcessing

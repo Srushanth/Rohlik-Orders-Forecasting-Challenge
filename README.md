@@ -1,8 +1,18 @@
 # Rohlik-Orders-Forecasting-Challenge
-Kaggle compitition
+Kaggle competition
+
+## Logging
+
+### In case of using `neptune`
+```python
+import neptune
+run = neptune.init_run(project='srushanthbaride/Rohlik-Orders-Forecasting-Challenge')
+```
+
+### In case of using `MLFlow `
 
 ## Overview
-[Rohlik Group](https://www.rohlik.group/), a leading European e-grocery innovator, is revolutionising the food retail industry. We operate across 11 warehouses in Czech Republic, Germany, Austria, Hungary, and Romania.
+[Rohlik Group](https://www.rohlik.group/), a leading European e-grocery innovator, is revolutionising the food retail industry. We operate across 11 warehouses in the Czech Republic, Germany, Austria, Hungary, and Romania.
 
 Our challenge focuses on predicting the number of orders (grocery deliveries) at selected warehouses for the next 60 days.
 
@@ -19,12 +29,12 @@ Submissions are evaluated on Mean Absolute Percentage Error between the predicte
 ## Submission File
 For each ID in the test set, you must predict the number of orders. The file should contain a header and have the following format:
 
-|ID                 |ORDERS|
-|-------------------|------|
-|Prague_1_2024-03-16|5000  |
-|Prague_1_2024-03-17|5000  |
-|Prague_1_2024-03-18|5000  |
-|etc.               |      |
+| ID                  | ORDERS |
+|---------------------|--------|
+| Prague_1_2024-03-16 | 5000   |
+| Prague_1_2024-03-17 | 5000   |
+| Prague_1_2024-03-18 | 5000   |
+| etc.                |        |
 
 ## Prizes
 ### Leaderboard prizes
