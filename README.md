@@ -11,6 +11,12 @@ run = neptune.init_run(project='srushanthbaride/Rohlik-Orders-Forecasting-Challe
 
 ### In case of using `MLFlow `
 
+To run `MLFlow` server, use the below command.
+
+```bash
+mlflow server --host 127.0.0.1 --port 8080
+```
+
 ## Overview
 [Rohlik Group](https://www.rohlik.group/), a leading European e-grocery innovator, is revolutionising the food retail industry. We operate across 11 warehouses in the Czech Republic, Germany, Austria, Hungary, and Romania.
 

@@ -13,6 +13,7 @@ xgboost = "^2.1.0"
 mlflow = "^2.14.1"
 kfp = "^2.8.0"
 neptune = "^1.10.4"
+pynvml = "^11.5.0"
 
 
 [build-system]
