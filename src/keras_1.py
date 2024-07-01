@@ -13,9 +13,11 @@
 import pandas as pd  # type: ignore
 from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import train_test_split  # type: ignore
-from sklearn.linear_model import ARDRegression  # type: ignore
-import mlflow
+from tensorflow.keras.layers import Dense  # type: ignore
+from tensorflow.keras.models import Sequential  # type: ignore
+import mlflow  # type: ignore
 
 from rocketml.pipeline import Pipeline
 from rocketml.pre_process import PreProcessing
@@ -71,11 +73,19 @@ x_train, x_test, y_train, y_test = train_test_split(
     X, y, train_size=0.8, random_state=42
 )
 
-with mlflow.start_run(log_system_metrics=True):
-    ardr = ARDRegression()
-    ardr.fit(x_train, y_train)
+model = Sequential()
+model.add(Dense(64, input_dim=x_train.shape[1], activation="relu"))
+model.add(Dense(64, activation="relu"))
+model.add(Dense(1, activation="linear"))
 
-    y_pred = ardr.predict(x_test)
+model.compile(optimizer="adam", loss="mean_absolute_percentage_error")
+
+with mlflow.start_run(log_system_metrics=True):
+    regressor = model.fit(
+        x_train, y_train, epochs=10000, validation_split=0.2, verbose=1
+    )
+
+    y_pred = model.predict(x_test)
 
     mse = mean_squared_error(y_true=y_test, y_pred=y_pred)
     print(mse)
@@ -83,20 +93,24 @@ with mlflow.start_run(log_system_metrics=True):
     r2 = r2_score(y_true=y_test, y_pred=y_pred)
     print(r2)
 
+    mape = mean_absolute_percentage_error(y_true=y_test, y_pred=y_pred)
+    print(mape)
+
     # Log parameters and metrics
-    mlflow.log_param(key="model", value="ARDRegression")
+    mlflow.log_param(key="model", value="keras_1")
     mlflow.log_metric(key="mse", value=mse)
     mlflow.log_metric(key="r2", value=r2)
+    mlflow.log_metric(key="mape", value=mape)
 
-    mlflow.sklearn.log_model(ardr, "model")
+    mlflow.tensorflow.log_model(model, "model")
 
     df_test = pd.read_csv("../data/test.csv")
     pipe = Pipeline()
     df_submission = pipe.preprocess_pipeline(df=df_test, steps=steps)
-    res = ardr.predict(df_submission)
+    res = model.predict(df_submission)
 
     # Create submission
     submission = pd.DataFrame()
     submission["id"] = df_test["id"].to_list()
-    submission["orders"] = res.tolist()
+    submission["orders"] = res.ravel()
     submission.to_csv("submission.csv", index=False)

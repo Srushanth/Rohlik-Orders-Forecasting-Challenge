@@ -14,7 +14,7 @@ import pandas as pd  # type: ignore
 from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import train_test_split  # type: ignore
-from sklearn.linear_model import ARDRegression  # type: ignore
+from sklearn.ensemble import RandomForestRegressor  # type: ignore
 import mlflow
 
 from rocketml.pipeline import Pipeline
@@ -72,10 +72,10 @@ x_train, x_test, y_train, y_test = train_test_split(
 )
 
 with mlflow.start_run(log_system_metrics=True):
-    ardr = ARDRegression()
-    ardr.fit(x_train, y_train)
+    regressor = RandomForestRegressor()
+    regressor.fit(x_train, y_train)
 
-    y_pred = ardr.predict(x_test)
+    y_pred = regressor.predict(x_test)
 
     mse = mean_squared_error(y_true=y_test, y_pred=y_pred)
     print(mse)
@@ -84,16 +84,16 @@ with mlflow.start_run(log_system_metrics=True):
     print(r2)
 
     # Log parameters and metrics
-    mlflow.log_param(key="model", value="ARDRegression")
+    mlflow.log_param(key="model", value="RandomForestRegressor")
     mlflow.log_metric(key="mse", value=mse)
     mlflow.log_metric(key="r2", value=r2)
 
-    mlflow.sklearn.log_model(ardr, "model")
+    mlflow.sklearn.log_model(regressor, "model")
 
     df_test = pd.read_csv("../data/test.csv")
     pipe = Pipeline()
     df_submission = pipe.preprocess_pipeline(df=df_test, steps=steps)
-    res = ardr.predict(df_submission)
+    res = regressor.predict(df_submission)
 
     # Create submission
     submission = pd.DataFrame()
