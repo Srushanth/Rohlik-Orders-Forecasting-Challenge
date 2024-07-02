@@ -10,22 +10,37 @@
 📚 Description: TODO.
 """
 
+import os
 import pandas as pd  # type: ignore
 from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import train_test_split  # type: ignore
-from sklearn.linear_model import RidgeCV
-from sklearn.svm import LinearSVR
-from sklearn.ensemble import VotingRegressor  # type: ignore
+import statsmodels.api as sm
 import mlflow
+from mlflow.client import MlflowClient
 
 from rocketml.pipeline import Pipeline
 from rocketml.pre_process import PreProcessing
 
+# Set the MLflow server tracking URI
+os.environ["MLFLOW_TRACKING_URI"] = "http://127.0.0.1:5000"
+
+# Initialize MLflow Client
+client = MlflowClient()
+
+# Create or get experiment
+experiment_name = "Rohlik Orders Forecasting Challenge"
+experiment = client.get_experiment_by_name(experiment_name)
+if experiment is None:
+    experiment_id = client.create_experiment(experiment_name)
+else:
+    experiment_id = experiment.experiment_id
+
 # Set up experiment
 experiment = mlflow.set_experiment("Rohlik Orders Forecasting Challenge")
 
-df = pd.read_csv("../data/train.csv")
+df = pd.read_csv("../../data/train.csv")
 
 data_columns = [
     "warehouse",
@@ -73,15 +88,15 @@ x_train, x_test, y_train, y_test = train_test_split(
     X, y, train_size=0.8, random_state=42
 )
 
-with mlflow.start_run(log_system_metrics=True):
-    estimators = [
-        ('lr', RidgeCV()),
-        ('svr', LinearSVR(random_state=42))
-    ]
-    regressor = VotingRegressor(estimators=estimators)
-    regressor.fit(x_train, y_train)
+with mlflow.start_run(experiment_id=experiment_id, log_system_metrics=True) as run:
+    x_train = sm.add_constant(x_train)
+    x_test = sm.add_constant(x_test)
 
-    y_pred = regressor.predict(x_test)
+    model = sm.OLS(y_train, x_train)
+
+    model = model.fit()
+
+    y_pred = model.predict(x_test)
 
     mse = mean_squared_error(y_true=y_test, y_pred=y_pred)
     print(mse)
@@ -89,20 +104,25 @@ with mlflow.start_run(log_system_metrics=True):
     r2 = r2_score(y_true=y_test, y_pred=y_pred)
     print(r2)
 
+    mape = mean_absolute_percentage_error(y_true=y_test, y_pred=y_pred)
+    print(mape)
+
     # Log parameters and metrics
-    mlflow.log_param(key="model", value="StackingRegressor")
+    mlflow.log_param(key="model", value="statsmodels_ols")
     mlflow.log_metric(key="mse", value=mse)
     mlflow.log_metric(key="r2", value=r2)
+    mlflow.log_metric(key="mape", value=mape)
 
-    mlflow.sklearn.log_model(regressor, "model")
+    mlflow.statsmodels.log_model(model, "model")
 
-    df_test = pd.read_csv("../data/test.csv")
+    df_test = pd.read_csv("../../data/test.csv")
     pipe = Pipeline()
     df_submission = pipe.preprocess_pipeline(df=df_test, steps=steps)
-    res = regressor.predict(df_submission)
+    df_submission = sm.add_constant(df_submission)
+    res = model.predict(df_submission)
 
     # Create submission
     submission = pd.DataFrame()
     submission["id"] = df_test["id"].to_list()
-    submission["orders"] = res.tolist()
+    submission["orders"] = res
     submission.to_csv("submission.csv", index=False)

@@ -10,22 +10,34 @@
 📚 Description: TODO.
 """
 
+import os
 import pandas as pd  # type: ignore
 from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import train_test_split  # type: ignore
-from tensorflow.keras.layers import Dense  # type: ignore
-from tensorflow.keras.models import Sequential  # type: ignore
-import mlflow  # type: ignore
+from sklearn.ensemble import RandomForestRegressor  # type: ignore
+import mlflow
+from mlflow.client import MlflowClient
 
 from rocketml.pipeline import Pipeline
 from rocketml.pre_process import PreProcessing
 
-# Set up experiment
-experiment = mlflow.set_experiment("Rohlik Orders Forecasting Challenge")
+# Set the MLflow server tracking URI
+os.environ["MLFLOW_TRACKING_URI"] = "http://127.0.0.1:5000"
 
-df = pd.read_csv("../data/train.csv")
+# Initialize MLflow Client
+client = MlflowClient()
+
+# Create or get experiment
+experiment_name = "Rohlik Orders Forecasting Challenge"
+experiment = client.get_experiment_by_name(experiment_name)
+if experiment is None:
+    experiment_id = client.create_experiment(experiment_name)
+else:
+    experiment_id = experiment.experiment_id
+
+df = pd.read_csv("../../data/train.csv")
 
 data_columns = [
     "warehouse",
@@ -73,19 +85,11 @@ x_train, x_test, y_train, y_test = train_test_split(
     X, y, train_size=0.8, random_state=42
 )
 
-model = Sequential()
-model.add(Dense(64, input_dim=x_train.shape[1], activation="relu"))
-model.add(Dense(64, activation="relu"))
-model.add(Dense(1, activation="linear"))
+with mlflow.start_run(experiment_id=experiment_id, log_system_metrics=True) as run:
+    regressor = RandomForestRegressor()
+    regressor.fit(x_train, y_train)
 
-model.compile(optimizer="adam", loss="mean_absolute_percentage_error")
-
-with mlflow.start_run(log_system_metrics=True):
-    regressor = model.fit(
-        x_train, y_train, epochs=10000, validation_split=0.2, verbose=1
-    )
-
-    y_pred = model.predict(x_test)
+    y_pred = regressor.predict(x_test)
 
     mse = mean_squared_error(y_true=y_test, y_pred=y_pred)
     print(mse)
@@ -97,20 +101,20 @@ with mlflow.start_run(log_system_metrics=True):
     print(mape)
 
     # Log parameters and metrics
-    mlflow.log_param(key="model", value="keras_1")
+    mlflow.log_param(key="model", value="RandomForestRegressor")
     mlflow.log_metric(key="mse", value=mse)
     mlflow.log_metric(key="r2", value=r2)
     mlflow.log_metric(key="mape", value=mape)
 
-    mlflow.tensorflow.log_model(model, "model")
+    mlflow.sklearn.log_model(regressor, "model")
 
-    df_test = pd.read_csv("../data/test.csv")
+    df_test = pd.read_csv("../../data/test.csv")
     pipe = Pipeline()
     df_submission = pipe.preprocess_pipeline(df=df_test, steps=steps)
-    res = model.predict(df_submission)
+    res = regressor.predict(df_submission)
 
     # Create submission
     submission = pd.DataFrame()
     submission["id"] = df_test["id"].to_list()
-    submission["orders"] = res.ravel()
+    submission["orders"] = res.tolist()
     submission.to_csv("submission.csv", index=False)

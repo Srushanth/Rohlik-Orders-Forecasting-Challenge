@@ -17,6 +17,7 @@ pynvml = "^11.5.0"
 tensorflow-io-gcs-filesystem = "0.31.0"
 tensorflow = "2.16.2"
 keras = "^3.4.1"
+statsmodels = "^0.14.2"
 
 
 [build-system]

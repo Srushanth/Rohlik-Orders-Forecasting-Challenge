@@ -14,7 +14,7 @@ run = neptune.init_run(project='srushanthbaride/Rohlik-Orders-Forecasting-Challe
 To run `MLFlow` server, use the below command.
 
 ```bash
-mlflow server --host 127.0.0.1 --port 8080
+mlflow ui --backend-store-uri sqlite:///C:/MLFlow/mlflow.db --default-artifact-root file:///C:/MLFlow --host 0.0.0.0 --port 5000
 ```
 
 ## Overview
