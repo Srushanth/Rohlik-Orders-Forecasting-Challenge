@@ -15,8 +15,11 @@ from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import train_test_split  # type: ignore
+from tensorflow.keras.layers import Input  # type: ignore
 from tensorflow.keras.layers import Dense  # type: ignore
 from tensorflow.keras.layers import Dropout  # type: ignore
+from tensorflow.keras.layers import AlphaDropout  # type: ignore
+from tensorflow.keras.layers import BatchNormalization  # type: ignore
 from tensorflow.keras.models import Sequential  # type: ignore
 import mlflow  # type: ignore
 
@@ -26,7 +29,7 @@ from rocketml.pre_process import PreProcessing
 # Set up experiment
 experiment = mlflow.set_experiment("Rohlik Orders Forecasting Challenge")
 
-df = pd.read_csv("../data/train.csv")
+df = pd.read_csv("../../data/train.csv")
 
 data_columns = [
     "warehouse",
@@ -74,12 +77,36 @@ x_train, x_test, y_train, y_test = train_test_split(
     X, y, train_size=0.8, random_state=42
 )
 
+
 model = Sequential()
-model.add(Dense(128, input_dim=x_train.shape[1], activation="relu"))
-model.add(Dropout(0.2))
-model.add(Dense(64, activation="relu"))
-model.add(Dropout(0.2))
-model.add(Dense(32, activation="relu"))
+
+# Input layer
+model.add(Input(shape=(x_train.shape[1],)))
+model.add(Dense(128, activation="selu"))
+model.add(BatchNormalization())
+model.add(Dropout(0.3))
+
+# Hidden layer 1
+model.add(Dense(128, activation="selu"))
+model.add(BatchNormalization())
+model.add(Dropout(0.3))
+
+# Hidden layer 2
+model.add(Dense(64, activation="selu"))
+model.add(BatchNormalization())
+model.add(Dropout(0.3))
+
+# Hidden layer 3
+model.add(Dense(64, activation="selu"))
+model.add(BatchNormalization())
+model.add(Dropout(0.3))
+
+# Hidden layer 4
+model.add(Dense(32, activation="selu"))
+model.add(BatchNormalization())
+model.add(Dropout(0.3))
+
+# Output layer
 model.add(Dense(1, activation="linear"))
 
 model.compile(optimizer="adam", loss="mean_absolute_percentage_error")
@@ -101,14 +128,14 @@ with mlflow.start_run(log_system_metrics=True):
     print(mape)
 
     # Log parameters and metrics
-    mlflow.log_param(key="model", value="tensorflow_2")
+    mlflow.log_param(key="model", value="tensorflow_4")
     mlflow.log_metric(key="mse", value=mse)
     mlflow.log_metric(key="r2", value=r2)
     mlflow.log_metric(key="mape", value=mape)
 
     mlflow.tensorflow.log_model(model, "model")
 
-    df_test = pd.read_csv("../data/test.csv")
+    df_test = pd.read_csv("../../data/test.csv")
     pipe = Pipeline()
     df_submission = pipe.preprocess_pipeline(df=df_test, steps=steps)
     res = model.predict(df_submission)
