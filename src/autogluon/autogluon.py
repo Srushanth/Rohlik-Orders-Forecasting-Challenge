@@ -11,17 +11,18 @@
 """
 
 import os
+
+import mlflow  # type: ignore
 import pandas as pd  # type: ignore
+from mlflow.client import MlflowClient  # type: ignore
+
+from autogluon.tabular import TabularPredictor  # type: ignore
+from rocketml.pipeline import Pipeline
+from rocketml.pre_process import PreProcessing
 from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import train_test_split  # type: ignore
-from sklearn.ensemble import AdaBoostRegressor  # type: ignore
-import mlflow
-from mlflow.client import MlflowClient
-
-from rocketml.pipeline import Pipeline
-from rocketml.pre_process import PreProcessing
 
 # Set the MLflow server tracking URI
 os.environ["MLFLOW_TRACKING_URI"] = "http://127.0.0.1:5000"
@@ -85,9 +86,10 @@ x_train, x_test, y_train, y_test = train_test_split(
     X, y, train_size=0.8, random_state=42
 )
 
+x_train = pd.concat([x_train, y_train], axis=1)
+
 with mlflow.start_run(experiment_id=experiment_id, log_system_metrics=True) as run:
-    regressor = AdaBoostRegressor()
-    regressor.fit(x_train, y_train)
+    regressor = TabularPredictor(label="orders").fit(x_train)
 
     y_pred = regressor.predict(x_test)
 
@@ -101,12 +103,10 @@ with mlflow.start_run(experiment_id=experiment_id, log_system_metrics=True) as r
     print(mape)
 
     # Log parameters and metrics
-    mlflow.log_param(key="model", value="AdaBoostRegressor")
+    mlflow.log_param(key="model", value="TabularPredictor")
     mlflow.log_metric(key="mse", value=mse)
     mlflow.log_metric(key="r2", value=r2)
     mlflow.log_metric(key="mape", value=mape)
-
-    mlflow.sklearn.log_model(regressor, "model")
 
     df_test = pd.read_csv("../../data/test.csv")
     pipe = Pipeline()
