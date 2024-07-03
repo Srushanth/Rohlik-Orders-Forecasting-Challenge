@@ -30,10 +30,10 @@ os.environ["MLFLOW_TRACKING_URI"] = "http://127.0.0.1:5000"
 client = MlflowClient()
 
 # Create or get experiment
-experiment_name = "Rohlik Orders Forecasting Challenge"
-experiment = client.get_experiment_by_name(experiment_name)
+EXPERIMENT_NAME = "Rohlik Orders Forecasting Challenge"
+experiment = client.get_experiment_by_name(EXPERIMENT_NAME)
 if experiment is None:
-    experiment_id = client.create_experiment(experiment_name)
+    experiment_id = client.create_experiment(EXPERIMENT_NAME)
 else:
     experiment_id = experiment.experiment_id
 
