@@ -16,7 +16,7 @@ from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import train_test_split  # type: ignore
-from sklearn.ensemble import AdaBoostRegressor  # type: ignore
+from catboost import CatBoostRegressor
 import mlflow
 from mlflow.client import MlflowClient
 
@@ -86,8 +86,8 @@ x_train, x_test, y_train, y_test = train_test_split(
 )
 
 with mlflow.start_run(experiment_id=experiment_id, log_system_metrics=True) as run:
-    regressor = AdaBoostRegressor()
-    regressor.fit(x_train, y_train)
+    regressor = CatBoostRegressor(loss_function="MAPE")
+    regressor.fit(x_train, y_train, verbose=1)
 
     y_pred = regressor.predict(x_test)
 
@@ -101,12 +101,12 @@ with mlflow.start_run(experiment_id=experiment_id, log_system_metrics=True) as r
     print(mape)
 
     # Log parameters and metrics
-    mlflow.log_param(key="model", value="AdaBoostRegressor")
+    mlflow.log_param(key="model", value="CatBoostRegressor")
     mlflow.log_metric(key="mse", value=mse)
     mlflow.log_metric(key="r2", value=r2)
     mlflow.log_metric(key="mape", value=mape)
 
-    mlflow.sklearn.log_model(regressor, "model")
+    mlflow.catboost.log_model(regressor, "model")
 
     df_test = pd.read_csv("../../data/test.csv")
     pipe = Pipeline()
