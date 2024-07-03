@@ -10,6 +10,7 @@
 📚 Description: TODO.
 """
 
+import os
 import pandas as pd  # type: ignore
 from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
@@ -19,13 +20,25 @@ from tensorflow.keras.layers import Dense  # type: ignore
 from tensorflow.keras.layers import Dropout  # type: ignore
 from tensorflow.keras.layers import BatchNormalization  # type: ignore
 from tensorflow.keras.models import Sequential  # type: ignore
-import mlflow  # type: ignore
+import mlflow
+from mlflow.client import MlflowClient
 
 from rocketml.pipeline import Pipeline
 from rocketml.pre_process import PreProcessing
 
-# Set up experiment
-experiment = mlflow.set_experiment("Rohlik Orders Forecasting Challenge")
+# Set the MLflow server tracking URI
+os.environ["MLFLOW_TRACKING_URI"] = "http://127.0.0.1:5000"
+
+# Initialize MLflow Client
+client = MlflowClient()
+
+# Create or get experiment
+EXPERIMENT_NAME = "Rohlik Orders Forecasting Challenge"
+experiment = client.get_experiment_by_name(EXPERIMENT_NAME)
+if experiment is None:
+    experiment_id = client.create_experiment(EXPERIMENT_NAME)
+else:
+    experiment_id = experiment.experiment_id
 
 df = pd.read_csv("../../data/train.csv")
 
@@ -107,7 +120,7 @@ model.add(Dense(1, activation="linear"))
 
 model.compile(optimizer="adam", loss="mean_absolute_percentage_error")
 
-with mlflow.start_run(log_system_metrics=True):
+with mlflow.start_run(experiment_id=experiment_id, log_system_metrics=True) as run:
     regressor = model.fit(
         x_train, y_train, epochs=1000, validation_split=0.2, verbose=1
     )
