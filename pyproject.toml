@@ -18,9 +18,9 @@ tensorflow-io-gcs-filesystem = "0.31.0"
 tensorflow = "2.16.2"
 keras = "^3.4.1"
 statsmodels = "^0.14.2"
-autogluon = "^1.1.1"
+autogluon = ">=1.1.1,<2.0.0"
 catboost = "^1.2.5"
-
+lightgbm = ">=3.3,<4.4"
 
 [build-system]
 requires = ["poetry-core"]
