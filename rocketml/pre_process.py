@@ -10,15 +10,16 @@
 📚 Description: TODO
 """
 
-import pandas as pd
 from typing import List
+
+import pandas as pd  # type: ignore
 
 
 class PreProcessing:
     """_summary_"""
 
     def __init__(self):
-        pd.set_option('future.no_silent_downcasting', True)
+        pd.set_option("future.no_silent_downcasting", True)
 
     @staticmethod
     def drop_columns(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
@@ -74,3 +75,24 @@ class PreProcessing:
             pd.DataFrame: _description_
         """
         return df.replace(to_replace=values, inplace=False).infer_objects(copy=False)
+
+    @staticmethod
+    def add_date_features(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
+        """_summary_
+
+        Args:
+            df (pd.DataFrame): _description_
+            column_name (str): _description_
+
+        Returns:
+            pd.DataFrame: _description_
+        """
+        df[column_name] = pd.to_datetime(df[column_name])
+        df["day"] = df[column_name].dt.day
+        df["month"] = df[column_name].dt.month
+        df["quarter"] = df[column_name].dt.quarter
+        df["year"] = df[column_name].dt.year
+        df["day_of_week"] = df[column_name].dt.day_of_week
+        df["day_of_year"] = df[column_name].dt.day_of_year
+        df = df.drop(columns=[column_name])
+        return df
