@@ -11,6 +11,7 @@
 """
 
 import os
+import json
 import pandas as pd  # type: ignore
 from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
@@ -69,14 +70,18 @@ df = df[data_columns]
 pp = PreProcessing()
 
 steps = [
-    (pp.drop_columns, {"columns": ["id", "date"]}),
+    (pp.drop_columns, {"columns": ["id"]}),
     (pp.encode_holiday_name, {"column_name": "holiday_name"}),
     (pp.create_dummies, {"column_name": "warehouse"}),
+    (pp.add_date_features, {"column_name": "date"}),
     (pp.replace_bool, {"values": {True: 1, False: 0}}),
 ]
 
 pipe = Pipeline()
 df_processed = pipe.preprocess_pipeline(df=df, steps=steps)
+
+# Log the pre-processing steps as JSON
+preprocessing_steps = json.dumps([{"step": step.__name__, "params": params} for step, params in steps])
 
 X = df_processed.drop(columns=["orders"])
 y = df_processed["orders"]
@@ -86,6 +91,9 @@ x_train, x_test, y_train, y_test = train_test_split(
 )
 
 with mlflow.start_run(experiment_id=experiment_id, log_system_metrics=True) as run:
+    # Log pre-processing steps
+    mlflow.log_param("preprocessing_steps", preprocessing_steps)
+
     regressor = PassiveAggressiveRegressor()
     regressor.fit(x_train, y_train)
 
