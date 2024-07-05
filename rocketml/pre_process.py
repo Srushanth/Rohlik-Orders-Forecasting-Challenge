@@ -13,6 +13,7 @@
 from typing import List
 
 import pandas as pd  # type: ignore
+from sklearn.preprocessing import StandardScaler
 
 
 class PreProcessing:
@@ -95,4 +96,22 @@ class PreProcessing:
         df["day_of_week"] = df[column_name].dt.day_of_week
         df["day_of_year"] = df[column_name].dt.day_of_year
         df = df.drop(columns=[column_name])
+        return df
+
+    @staticmethod
+    def standard_scaler(df: pd.DataFrame, columns: List[str]) -> pd.DataFrame:
+        """_summary_
+
+        Args:
+            df (pd.DataFrame): _description_
+            columns (List[str]): _description_
+
+        Returns:
+            pd.DataFrame: _description_
+        """
+        # Create a StandardScaler object
+        scaler = StandardScaler()
+
+        # Fit and transform the DataFrame (assuming 'df' is your DataFrame)
+        df[columns] = scaler.fit_transform(df[columns])
         return df
