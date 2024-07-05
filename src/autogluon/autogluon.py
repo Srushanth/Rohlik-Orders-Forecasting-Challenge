@@ -70,10 +70,12 @@ df = df[data_columns]
 pp = PreProcessing()
 
 steps = [
-    (pp.drop_columns, {"columns": ["id", "date"]}),
+    (pp.drop_columns, {"columns": ["id"]}),
     (pp.encode_holiday_name, {"column_name": "holiday_name"}),
     (pp.create_dummies, {"column_name": "warehouse"}),
+    (pp.add_date_features, {"column_name": "date"}),
     (pp.replace_bool, {"values": {True: 1, False: 0}}),
+    (pp.standard_scaler, {"columns": ["day", "month", "quarter", "year", "day_of_week", "day_of_year"]}),
 ]
 
 pipe = Pipeline()

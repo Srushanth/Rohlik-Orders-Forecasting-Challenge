@@ -78,6 +78,7 @@ steps = [
     (pp.create_dummies, {"column_name": "warehouse"}),
     (pp.add_date_features, {"column_name": "date"}),
     (pp.replace_bool, {"values": {True: 1, False: 0}}),
+    (pp.standard_scaler, {"columns": ["day", "month", "quarter", "year", "day_of_week", "day_of_year"]}),
 ]
 
 pipe = Pipeline()

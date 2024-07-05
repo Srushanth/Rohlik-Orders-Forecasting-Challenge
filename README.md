@@ -1,6 +1,12 @@
 # Rohlik-Orders-Forecasting-Challenge
 Kaggle competition
 
+## My Report
+
+Here is the submission numbers by rank:
+
+![Submission Numbers by Rank](./images/rank_submission_chart.png)
+
 ## Logging
 
 ### In case of using `neptune`
