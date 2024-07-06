@@ -13,7 +13,7 @@
 from typing import List
 
 import pandas as pd  # type: ignore
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler  # type: ignore
 
 
 class PreProcessing:
