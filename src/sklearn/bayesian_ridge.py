@@ -17,7 +17,7 @@ from sklearn.metrics import r2_score  # type: ignore
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.model_selection import train_test_split  # type: ignore
-from sklearn.ensemble import RandomForestRegressor  # type: ignore
+from sklearn.linear_model import BayesianRidge  # type: ignore
 import mlflow
 from mlflow.client import MlflowClient
 
@@ -131,7 +131,7 @@ with mlflow.start_run(experiment_id=experiment_id, log_system_metrics=True) as r
     # Log pre-processing steps
     mlflow.log_param("preprocessing_steps", preprocessing_steps)
 
-    regressor = RandomForestRegressor()
+    regressor = BayesianRidge()
     regressor.fit(x_train, y_train)
 
     y_pred = regressor.predict(x_test)
@@ -146,7 +146,7 @@ with mlflow.start_run(experiment_id=experiment_id, log_system_metrics=True) as r
     print(mape)
 
     # Log parameters and metrics
-    mlflow.log_param(key="model", value="RandomForestRegressor")
+    mlflow.log_param(key="model", value="BayesianRidge")
     mlflow.log_metric(key="mse", value=mse)
     mlflow.log_metric(key="r2", value=r2)
     mlflow.log_metric(key="mape", value=mape)

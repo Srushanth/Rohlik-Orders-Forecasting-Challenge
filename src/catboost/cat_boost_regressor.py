@@ -66,9 +66,34 @@ target_columns = ["orders"]
 
 df = df[data_columns]
 
+warehouse_map = {
+    "Brno_1": 1,
+    "Prague_1": 2,
+    "Prague_2": 3,
+    "Prague_3": 4,
+    "Budapest_1": 5,
+    "Munich_1": 6,
+    "Frankfurt_1": 7
+}
+
 pp = PreProcessing()
 
-steps = [
+steps1 = [
+    (pp.drop_columns, {"columns": ["id"]}),
+    (pp.encode_holiday_name, {"column_name": "holiday_name"}),
+    (pp.create_dummies, {"column_name": "warehouse"}),
+    (pp.replace_bool, {"values": {True: 1, False: 0}}),
+]
+
+steps2 = [
+    (pp.drop_columns, {"columns": ["id"]}),
+    (pp.encode_holiday_name, {"column_name": "holiday_name"}),
+    (pp.create_dummies, {"column_name": "warehouse"}),
+    (pp.add_date_features, {"column_name": "date"}),
+    (pp.replace_bool, {"values": {True: 1, False: 0}}),
+]
+
+steps3 = [
     (pp.drop_columns, {"columns": ["id"]}),
     (pp.encode_holiday_name, {"column_name": "holiday_name"}),
     (pp.create_dummies, {"column_name": "warehouse"}),
@@ -76,6 +101,17 @@ steps = [
     (pp.replace_bool, {"values": {True: 1, False: 0}}),
     (pp.standard_scaler, {"columns": ["day", "month", "quarter", "year", "day_of_week", "day_of_year"]}),
 ]
+
+steps4 = [
+    (pp.drop_columns, {"columns": ["id"]}),
+    (pp.encode_holiday_name, {"column_name": "holiday_name"}),
+    (pp.replace_value, {"column_name": "warehouse", "values": warehouse_map}),
+    (pp.add_date_features, {"column_name": "date"}),
+    (pp.replace_bool, {"values": {True: 1, False: 0}}),
+    (pp.standard_scaler, {"columns": ["day", "month", "quarter", "year", "day_of_week", "day_of_year"]}),
+]
+
+steps = steps4
 
 pipe = Pipeline()
 df_processed = pipe.preprocess_pipeline(df=df, steps=steps)

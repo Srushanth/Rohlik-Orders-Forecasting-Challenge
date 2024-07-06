@@ -78,6 +78,22 @@ class PreProcessing:
         return df.replace(to_replace=values, inplace=False).infer_objects(copy=False)
 
     @staticmethod
+    def replace_value(df: pd.DataFrame, column_name: str, values: dict) -> pd.DataFrame:
+        """_summary_
+
+        Args:
+            df (pd.DataFrame): _description_
+            column_name (str): _description_
+            values (dict): _description_
+
+        Returns:
+            pd.DataFrame: _description_
+        """
+        df[column_name] = df[column_name].replace(values)
+
+        return df
+
+    @staticmethod
     def add_date_features(df: pd.DataFrame, column_name: str) -> pd.DataFrame:
         """_summary_
 

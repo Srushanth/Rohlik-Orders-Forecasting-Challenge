@@ -13,8 +13,8 @@
 import matplotlib.pyplot as plt
 
 # Sample data
-ranks = [168, 168, 168]
-submissions = ["Submission 23", "Submission 24", "Submission 25"]
+ranks = [168, 168, 168, 168]
+submissions = [23, 24, 25, 26]
 
 # Create the bar chart
 plt.plot(submissions, ranks, marker="o")
