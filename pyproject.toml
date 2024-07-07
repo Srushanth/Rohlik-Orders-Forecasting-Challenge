@@ -21,6 +21,9 @@ statsmodels = "^0.14.2"
 autogluon = ">=1.1.1,<2.0.0"
 catboost = "^1.2.5"
 lightgbm = ">=3.3,<4.4"
+seaborn = "^0.13.2"
+plotly = "^5.22.0"
+nbformat = "^5.10.4"
 
 [build-system]
 requires = ["poetry-core"]
